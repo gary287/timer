@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <title>Timer</title>
+    </head>
+    <body>
+        <h1>Timer</h1>
+        <button id="start">Start</button>
+        <div id="time-remaining"></div>
+    </body>
+    <script src="adapter.js"></script>
+    <script type="text/javascript">
+        const timeRemaining = document.getElementById("time-remaining");
+        
+        let endTime = Date.now();
+        let interval = 0;
+        let secondsRemaining = 0;
+        
+        document.getElementById("start").addEventListener('click', e => {
+            stop();
+
+            endTime = Date.now() + 10000;
+
+            update();
+
+            interval = setInterval(update, 1000);
+        });
+
+        function stop() {
+            if (interval != 0)
+            {
+                clearInterval(interval);
+                interval = 0;
+                secondsRemaining = 0;
+                display();
+            }
+        }
+
+        function display() {
+            let minutesAndSeconds = `${Math.floor(secondsRemaining / 60)}:${(secondsRemaining % 60).toString().padStart(2, '0')}`;
+            timeRemaining.innerText = minutesAndSeconds;
+            document.title = `${minutesAndSeconds} - Timer`;
+        }
+
+        function update() {
+            secondsRemaining = Math.ceil((endTime - Date.now()) / 1000);
+                
+            console.log(secondsRemaining);
+
+            if (secondsRemaining <= 0) {
+                stop();
+            }
+            
+            display();
+        }
+    </script>
+</html>
