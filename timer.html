@@ -1,56 +1,163 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>Timer</title>
-    </head>
-    <body>
-        <h1>Timer</h1>
-        <button id="start">Start</button>
-        <div id="time-remaining"></div>
-    </body>
-    <script src="adapter.js"></script>
-    <script type="text/javascript">
-        const timeRemaining = document.getElementById("time-remaining");
-        
-        let endTime = Date.now();
-        let interval = 0;
-        let secondsRemaining = 0;
-        
-        document.getElementById("start").addEventListener('click', e => {
-            stop();
 
-            endTime = Date.now() + 10000;
+<head>
+    <title>0:00</title>
+    <style>
+        button {
+            height: 30px;
+        }
+    </style>
+</head>
 
-            update();
+<body>
+    <script>
 
-            interval = setInterval(update, 1000);
-        });
+    </script>
+    <fieldset>
+        <legend>Timer</legend>
+        <button onclick="startTimer(10)">10 minutes</button>
+        <button onclick="startTimer(20)">20 minutes</button>
+        <button onclick="startTimer(60)">60 minutes</button>
+        <button onclick="startTimer()">
+            <label>
+                <input id="minutesInput" onchange="save(this.id, this.value)" onclick="minutesInputClicked()"
+                    type="number" min="1" max="60" value="5" />
+                minutes
+            </label>
+        </button>
+        <h1 id="timeRemainingDisplay">0:00</h1>
+        <button onclick="stopTimer()">Stop</button>
+        <script>
+            const timeRemainingDisplay = document.getElementById("timeRemainingDisplay");
+            const minutesInput = document.getElementById("minutesInput");
 
-        function stop() {
-            if (interval != 0)
-            {
-                clearInterval(interval);
-                interval = 0;
-                secondsRemaining = 0;
+            let endTime = Date.now();
+            let interval = 0;
+            let secondsRemaining = 0;
+
+            function minutesInputClicked() {
+                event.preventDefault();
+                event.cancelBubble = true;
+            }
+
+            function startTimer(minutes) {
+                stopTimer();
+
+                if (!minutes) {
+                    minutes = parseInt(minutesInput.value)
+                }
+
+                endTime = Date.now() + (minutes * 60 * 1000);
+
+                update();
+
+                interval = setInterval(update, 1000);
+            }
+
+            function stopTimer() {
+                if (interval != 0) {
+                    clearInterval(interval);
+                    interval = 0;
+                    secondsRemaining = 0;
+                    display();
+                }
+            }
+
+            function display() {
+                let minutesAndSeconds = `${Math.floor(secondsRemaining / 60)}:${(secondsRemaining % 60).toString().padStart(2, '0')}`;
+                timeRemainingDisplay.innerText = minutesAndSeconds;
+                document.title = minutesAndSeconds;
+            }
+
+            function update() {
+                secondsRemaining = Math.ceil((endTime - Date.now()) / 1000);
+
+                if (secondsRemaining <= 0) {
+                    if (secondsRemaining > -5) {
+                        beep();
+                    }
+
+                    stopTimer();
+                }
+
                 display();
             }
-        }
+        </script>
+    </fieldset>
+    <fieldset>
+        <legend>Sound Settings</legend>
+        <div>
+            <label>frequency
+                <input type="range" id="frequencyInput" min="40" max="6000" value="400"
+                    oninput="displaySoundSettings()" />
+                <span id="frequencyDisplay"></span>
+            </label>
+        </div>
+        <div>
+            <label>type
+                <input type="range" id="typeInput" min="0" max="3" value="0" oninput="displaySoundSettings()" />
+                <span id="typeDisplay"></span></label>
+        </div>
+        <div>
+            <label>volume
+                <input type="range" id="volumeInput" min="0" max="100" value="50" oninput="displaySoundSettings()" />
+                <span id="volumeDisplay"></span></label>
+        </div>
+        <div>
+            <label>duration
+                <input type="range" id="durationInput" min="1" max="5000" value="500"
+                    oninput="displaySoundSettings()" />
+                <span id="durationDisplay"></span></label>
+        </div>
+        <div>
+            <button onclick="beep()">Test</button>
+        </div>
+        <script>
+            let audioContext = null;
+            let frequency = 400;
+            let type = 0;
+            let volume = .5;
+            let duration = 500;
 
-        function display() {
-            let minutesAndSeconds = `${Math.floor(secondsRemaining / 60)}:${(secondsRemaining % 60).toString().padStart(2, '0')}`;
-            timeRemaining.innerText = minutesAndSeconds;
-            document.title = `${minutesAndSeconds} - Timer`;
-        }
+            displaySoundSettings();
 
-        function update() {
-            secondsRemaining = Math.ceil((endTime - Date.now()) / 1000);
-                
-            console.log(secondsRemaining);
+            function displaySoundSettings() {
+                frequency = document.getElementById("frequencyInput").value;
+                document.getElementById("frequencyDisplay").innerHTML = `${frequency} Hz`;
 
-            if (secondsRemaining <= 0) {
-                stop();
+                switch (document.getElementById("typeInput").value * 1) {
+                    case 0: type = 'sine'; break;
+                    case 1: type = 'square'; break;
+                    case 2: type = 'sawtooth'; break;
+                    case 3: type = 'triangle'; break;
+                }
+                document.getElementById("typeDisplay").innerHTML = type;
+
+                volume = document.getElementById("volumeInput").value / 100;
+                document.getElementById("volumeDisplay").innerHTML = volume;
+
+                duration = document.getElementById("durationInput").value;
+                document.getElementById("durationDisplay").innerHTML = `${duration} ms`;
             }
-            
-            display();
-        }
-    </script>
+
+            function beep() {
+                if (audioContext == null) {
+                    audioContext = new AudioContext();
+                }
+                var oscillator = audioContext.createOscillator();
+                var gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = volume;
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + (duration / 1000));
+            };
+        </script>
+        </div>
+    </fieldset>
+</body>
+
 </html>
