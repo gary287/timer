@@ -194,6 +194,9 @@
                 .then((offer) => {
                     console.info("offer")
                     console.info(offer.sdp);
+                    rtcPeerConnection.setLocalDescription(offer).then(() => {
+                        console.info("localDescription", rtcPeerConnection.localDescription)
+                    });
                 })
         };
     </script>
