@@ -167,37 +167,6 @@
             document.querySelector("#stop-timer").onclick = event => stopTimer();
 
             document.querySelector("#test-beep").onclick = event => beep();
-
-            let rtcPeerConnection = new RTCPeerConnection();
-            rtcPeerConnection.onconnectionstatechange = event => console.info("onconnectionstatechange", event);
-            rtcPeerConnection.ondatachannel = event => console.info("ondatachannel", event);
-            rtcPeerConnection.onicecandidate = event => {
-                console.info("onicecandidate");
-                console.info(JSON.stringify(event.candidate, null, 4));
-            }
-            rtcPeerConnection.onicecandidateerror = event => console.info("onicecandidateerror", event);
-            rtcPeerConnection.oniceconnectionstatechange = event => console.info("oniceconnectionstatechange", event);
-            rtcPeerConnection.onicegatheringstatechange = event => console.info("onicegatheringstatechange", event);
-            rtcPeerConnection.onnegotiationneeded = event => console.info("onnegotiationneeded", event);
-            rtcPeerConnection.onsignalingstatechange = event => console.info("onsignalingstatechange", event);
-            rtcPeerConnection.ontrack = event => console.info("ontrack", event);
-
-            let rtcDataChannel = rtcPeerConnection.createDataChannel('test', { reliable: true });
-            rtcDataChannel.onbufferedamountlow = event => console.info("onbufferedamountlow", event);
-            rtcDataChannel.onclose = event => console.info("onclose", event);
-            rtcDataChannel.onclosing = event => console.info("onclosing", event);
-            rtcDataChannel.onerror = event => console.info("onerror", event);
-            rtcDataChannel.onmessage = event => console.info("onmessage", event);
-            rtcDataChannel.onopen = event => console.info("onopen", event);
-
-            rtcPeerConnection.createOffer()
-                .then((offer) => {
-                    console.info("offer")
-                    console.info(offer.sdp);
-                    rtcPeerConnection.setLocalDescription(offer).then(() => {
-                        console.info("localDescription", rtcPeerConnection.localDescription)
-                    });
-                })
         };
     </script>
 </body>
